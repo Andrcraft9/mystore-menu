@@ -9,13 +9,33 @@
 #include <time.h>
 #include <string.h>
 
+#include <ctime>
 #include <vector>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <filesystem>
 
+#include <cstdlib>
+
 namespace fs = std::filesystem;
+
+static const std::string STOR_PATH("/home/andr/mstor/");
+
+std::string get_current_date()
+{
+    time_t rawtime;
+    struct tm * timeinfo;
+    char buffer[80];
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    strftime(buffer, sizeof(buffer), "%d-%m-%Y %I:%M:%S", timeinfo);
+    std::string str(buffer);
+
+    return str;
+}
 
 int crypt_add(int c, int count, char* crypt)
 {
@@ -29,9 +49,6 @@ int crypt_rm(int c, int count, char* crypt)
 
 std::string read_store(char *crypt, std::string namef)
 {
-    //def_prog_mode();
-    //endwin(); 
-
     //Read
     std::string note;
     int f_fd = open(namef.c_str(),O_RDONLY);
@@ -56,10 +73,6 @@ std::string read_store(char *crypt, std::string namef)
     }
     close(f_fd);
 
-    //printf("%s \n", note.c_str());
-    //getch();
-    //reset_prog_mode();
-
     /*
     std::string note;
     std::ifstream f;
@@ -77,69 +90,104 @@ std::string read_store(char *crypt, std::string namef)
     return note;
 }
 
+int write_store(char *crypt, std::string notef, std::string namef)
+{
+    int f_fd, newf_fd;
+    int count;
+    char buf[4096];
+    ssize_t len;
+    
+    f_fd = open(notef.c_str(), O_RDONLY);
+    if (f_fd < 0)
+    {
+        return 1;
+    }
+
+    newf_fd = open(namef.c_str(), O_WRONLY|O_CREAT|O_APPEND, 0666);
+    if (newf_fd < 0) 
+    {
+        return 1;
+    }
+
+    //Read, write and crypt
+    count = 0;
+    while ((len=read(f_fd, buf, sizeof(buf))) > 0)
+    {
+        for(int i = 0; i < len; ++i)
+        {
+            buf[i] = (char) crypt_add(buf[i], count, crypt);
+            count = (count + 1) % 5;
+        }
+        write(newf_fd,buf,len);
+    }
+    close(f_fd);
+    close(newf_fd);
+
+    return 0;
+}
+
 class Menu
 {
 public:
-    Menu(int x, int y, int w, int h, const std::vector<std::string> c) 
-        : x(x), y(y), width(w), height(h), content(c), win(newwin(h, w, y, x))
+    Menu(int x, int y, int w, int h, std::vector<std::string> c) 
+        : x(x), y(y), width(w), height(h), win(newwin(h, w, y, x)), content(c)
     {
         keypad(win, TRUE);
-        scrollok(win, TRUE);
-        content.push_back("Exit");
-        current_state = 0;
+        //scrollok(win, TRUE);
 
-        /*
-        items = (ITEM **) calloc(content.size()+1, sizeof(ITEM *));
-        for(int i = 0; i < content.size(); ++i)
-                items[i] = new_item(content[i].c_str(), content[i].c_str());
-        items[content.size()] = (ITEM *) NULL;
+        items_len = content.size() + 1;
+        items = (ITEM **) calloc(items_len + 1, sizeof(ITEM *));
+        for(int i = 0; i < items_len - 1; ++i)
+            items[i] = new_item(content.at(i).c_str(), content.at(i).c_str());
+        items[items_len - 1] = new_item("Exit", "Exit");
+        items[items_len] = (ITEM *) NULL;
         men = new_menu((ITEM **) items);
         set_menu_win(men, win);
-        //set_menu_sub(men, derwin(win, h, w, 5, 5));
-        set_menu_format(men, 4, 1);
+        set_menu_format(men, int(h*0.8), 1);
         set_menu_mark(men, " * ");
+        set_menu_back(men, COLOR_PAIR(1));
+        set_menu_fore(men, COLOR_PAIR(2));
+        set_menu_pad(men, COLOR_PAIR(2));
         menu_opts_off(men, O_SHOWDESC);
+
+        mvprintw(1, 0, "Count %i", items_len);
+        refresh();
+        //set_menu_sub(men, derwin(win, h-2, w-1, 0, 0));
         //mvwaddch(win, 2, 0, ACS_LTEE);
         //mvwhline(win, 2, 1, ACS_HLINE, 38);
         //mvwaddch(win, 2, 39, ACS_RTEE);
-        */
+        box(win, 0, 0);
+        post_menu(men);
     }
 
     ~Menu() 
     {
-        wborder(win, ' ', ' ', ' ',' ',' ',' ',' ',' ');
-        /* The parameters taken are 
-        * 1. win: the window on which to operate
-        * 2. ls: character to be used for the left side of the window 
-        * 3. rs: character to be used for the right side of the window 
-        * 4. ts: character to be used for the top side of the window 
-        * 5. bs: character to be used for the bottom side of the window 
-        * 6. tl: character to be used for the top left corner of the window 
-        * 7. tr: character to be used for the top right corner of the window 
-        * 8. bl: character to be used for the bottom left corner of the window 
-        * 9. br: character to be used for the bottom right corner of the window
-        */
-
-        //unpost_menu(men);
-        //free_menu(men);
-        //for(int i = 0; i < content.size(); ++i)
-        //        free_item(items[i]);
+        //wborder(win, ' ', ' ', ' ',' ',' ',' ',' ',' ');
+        unpost_menu(men);
+        free_menu(men);
+        for(int i = 0; i < items_len; ++i)
+            free_item(items[i]);
 
         wclear(win);
         wrefresh(win);
         delwin(win);
     }
 
-    std::string get_state_string(int state)
+    std::string get_current_item_name(int id)
     {
-        return content[state-1];
+        if (id > items_len)
+            return "UNKNOWN ID";
+        ITEM *i;
+        i = items[id-1];
+        std::string iname(item_name(i));
+        return iname;
     }
 
     int control()
     {
-        int c, choice;
+        int c, icur;
+        ITEM *cur;
 
-        current_state = 1;
         this->show();
         while(1)
         {
@@ -147,24 +195,18 @@ public:
             switch(c)
             {
                 case KEY_UP:
-                    //menu_driver(men, REQ_UP_ITEM);
-                    if(current_state == 1)
-                        current_state = content.size();
-                    else
-                        --current_state;
+                    menu_driver(men, REQ_UP_ITEM);
                     break;
                 case KEY_DOWN:
-                    //menu_driver(men, REQ_DOWN_ITEM);
-                    if(current_state == content.size())
-                        current_state = 1;
-                    else 
-                        ++current_state;
+                    menu_driver(men, REQ_DOWN_ITEM);
                     break;
                 case 10:
-                    if (current_state == content.size())
+                    cur = current_item(men);
+                    icur = item_index(cur);
+                    if (icur == items_len-1)
                         return 0;
                     else
-                        return current_state;
+                        return icur+1; 
                     break;
                 default:
                     break;
@@ -178,43 +220,21 @@ public:
 
     void show()
     {
-        int locx, locy;
-        locx = 2;
-        locy = 2;
-
-        for(int i = 0; i < content.size(); ++i)
-        {
-            if(current_state == i + 1)
-            {
-                wattron(win, A_BOLD); 
-                wattron(win, COLOR_PAIR(1));
-                mvwprintw(win, locy, locx, "%s", content[i].c_str());
-                wattroff(win, A_BOLD);
-                wattroff(win, COLOR_PAIR(1));
-            }
-            else
-                mvwprintw(win, locy, locx, "%s", content[i].c_str());
-            ++locy;
-        }
-        
-        //post_menu(men);
-
-        box(win, 0, 0);
         wrefresh(win);
     }
 
 private:
     WINDOW *win;
-    //ITEM **items;
-    //MENU *men;
-    
-    int current_state;
+    MENU *men;
+    ITEM **items;
+    int items_len;
+
+    std::vector<std::string> content;
 
     int x;
     int y;
     int width;
     int height;
-    std::vector<std::string> content;
 
     // No copy
     Menu(const Menu& m);
@@ -228,7 +248,7 @@ public:
         : x(x), y(y), width(w), height(h), content(c), win(newwin(h, w, y, x))
     {
         keypad(win, TRUE);
-        scrollok(win, TRUE);
+        //scrollok(win, TRUE);
         //clearok(win, TRUE);
         //idlok(win, TRUE);
         //immedok(win, TRUE);
@@ -254,10 +274,10 @@ public:
             switch(c)
             {
                 case KEY_UP:
-                    wscrl(win, -1);
+                    //wscrl(win, -1);
                     break;
                 case KEY_DOWN:
-                    wscrl(win, 1); 
+                    //wscrl(win, 1); 
                     break;
                 case 10:
                     return;
@@ -283,6 +303,85 @@ private:
     TextBox& operator=(TextBox const&);
 };
 
+class TextPadBox
+{
+public:
+    TextPadBox(int x, int y, int w, int h, const std::string c) 
+        : x(x), y(y), width(w), height(h), content(c)
+    {
+        
+        int newlines = 0;
+        for (int i = 0; i < content.length(); i++)
+            if (content[i] == '\n') newlines++;
+        PadHeight = ((content.length() - newlines)/w + newlines + 1);
+
+        win = newpad(PadHeight, w);
+        keypad(win, TRUE);
+    }
+
+    ~TextPadBox() 
+    {
+        delwin(win);
+        
+        // How clear pad correctly? Dont know...
+        win = newwin(height+5, width+5, y, x);
+        wclear(win);
+        wrefresh(win);
+        delwin(win);
+    }
+
+    void show() const
+    {
+        int c, cols;
+        cols = 0;
+        mvwprintw(win, 0, 0, "%s", content.c_str());
+        //waddstr(win, content.c_str());
+        refresh();
+        while(1)
+        {
+            c = wgetch(win);
+            switch(c)
+            {
+                case KEY_UP:
+                {
+                    if (cols <= 0) continue;
+                    cols--;
+                    break;
+                }
+                case KEY_DOWN:
+                {
+                    if (cols+height+1 >= PadHeight) continue;
+                    cols++;
+                    break;
+                }
+                case 10:
+                    return;
+                    break;
+                default:
+                    return;
+                    break;
+            }
+
+            prefresh(win, cols, 0, y, x, y + height, x + width);
+            refresh();
+        }
+    }
+
+private:
+    WINDOW *win;
+
+    int x;
+    int y;
+    int width;
+    int height;
+    int PadHeight;
+    std::string content;
+
+    // No copy
+    TextPadBox(const TextPadBox& m);
+    TextPadBox& operator=(TextPadBox const&);
+};
+
 int main()
 {   
     setlocale(LC_CTYPE, "ru_RU.UTF8"); // +lncursesw = russian language
@@ -296,7 +395,9 @@ int main()
         return 1;
     }
     start_color();
-    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(1, COLOR_WHITE, COLOR_BLACK);
+    init_pair(2, COLOR_RED, COLOR_BLACK);
+    init_pair(3, COLOR_BLUE, COLOR_BLACK);
     clear();
     noecho();
     cbreak();
@@ -304,36 +405,86 @@ int main()
     mvprintw(0, 0, "Welcome to mystore-menu, alpha version 0.0.1");
     refresh();
 
-    Menu main_menu(0, 1, 30, 10, 
-        {"MyStore, Create", "MyStore, Read", "TODO, Local List", "TODO, Global List"});
+    Menu main_menu(0, 3, 30, 7, 
+        {"MyStore, Create", "MyStore, Read (Pad)", "MyStore, Read (Win)", "TODO, Local List", "TODO, Global List"});
     int main_state;
 
     while(main_state = main_menu.control())
     {
         switch(main_state)
         {
-            case 2:
+            case 1:
             {
                 char crypt[50];
                 def_prog_mode(); /* Save the tty modes */
                 endwin(); /* End curses mode temporarily */
+                std::system("nano note");
+
+                printf("Note is written! \n");
                 printf("Please enter password: \n");
                 scanf("%s", crypt);
-                reset_prog_mode(); /* Return to the previous tty mode*/
 
-                std::string path = "/home/andr/mstor/";
+                std::string namef = STOR_PATH + get_current_date();
+                write_store(crypt, "./note", namef);
+                std::system("rm note");
+
+                reset_prog_mode(); /* Return to the previous tty mode*/
+                
+                attron(COLOR_PAIR(3));
+                mvprintw(1, 0, "Note is MyStored!");
+                refresh();
+                attroff(COLOR_PAIR(3));
+
+                break;
+            }
+            case 2:
+            {
+                char crypt[50];
+                def_prog_mode();
+                endwin();
+                printf("Please enter password: \n");
+                scanf("%s", crypt);
+                reset_prog_mode();
+
+                std::string path = STOR_PATH;
                 std::vector<std::string> vs;
                 for (const auto & p : fs::directory_iterator(path))
                     vs.push_back(p.path().u8string());
-                Menu r_menu(0, 12, 60, 30, vs);
+                Menu r_menu(0, 10, 50, 20, vs);
                 int r_state;
 
                 while(r_state = r_menu.control())
                 {
-                    std::string namef = r_menu.get_state_string(r_state);
+                    std::string namef = r_menu.get_current_item_name(r_state);
                     std::string note = read_store(crypt, namef);
 
-                    TextBox noteBox(70, 1, 120, 80, note);
+                    TextPadBox noteBox(70, 4, 100, 40, note);
+                    noteBox.show();
+                }
+                break;
+            }
+            case 3:
+            {
+                char crypt[50];
+                def_prog_mode();
+                endwin();
+                printf("Please enter password: \n");
+                scanf("%s", crypt);
+                reset_prog_mode();
+
+                std::string path = STOR_PATH;
+                std::vector<std::string> vs;
+                for (const auto & p : fs::directory_iterator(path))
+                    vs.push_back(p.path().u8string());
+                Menu r_menu(0, 10, 50, 20, vs);
+                int r_state;
+
+                while(r_state = r_menu.control())
+                {
+                    std::string namef = r_menu.get_current_item_name(r_state);
+                    std::string note = read_store(crypt, namef);
+
+                    TextBox noteBox(70, 4, 100, 40, note);
                     noteBox.show();
                 }
                 break;
@@ -342,8 +493,10 @@ int main()
                 break;
         }
         
-        mvprintw(12, 0, "Your choice is %s \n", main_menu.get_state_string(main_state).c_str());
+        attron(COLOR_PAIR(3));
+        mvprintw(1, 0, "Your choice is %s \n", main_menu.get_current_item_name(main_state).c_str());
         refresh();
+        attroff(COLOR_PAIR(3));
     }
     
     } endwin(); // All objects need be deleted before endwin() call
