@@ -82,7 +82,7 @@ int main()
     int screenRow, screenCol;
     getmaxyx(stdscr, screenCol, screenRow); 
 
-    mvprintw(0, 0, "Welcome to mystore-menu, alpha version 0.0.4");
+    mvprintw(0, 0, "Welcome to mystore-menu, alpha version 0.0.5");
     attron(COLOR_PAIR(3));
     mvhline(screenCol-1, 0, ' ', screenRow);
     attroff(COLOR_PAIR(3));
