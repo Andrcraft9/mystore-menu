@@ -19,7 +19,7 @@
 namespace fs = std::filesystem;
 
 static const std::string CONF_PATH("./"); 
-// /home/andr/bin/mystore-menu-conf/config 
+//static const std::string CONF_PATH("/home/andr/bin/mystore-menu-conf/"); 
 
 std::string get_current_date()
 {
@@ -83,6 +83,9 @@ int main()
     getmaxyx(stdscr, screenCol, screenRow); 
 
     mvprintw(0, 0, "Welcome to mystore-menu, alpha version 0.0.4");
+    attron(COLOR_PAIR(3));
+    mvhline(screenCol-1, 0, ' ', screenRow);
+    attroff(COLOR_PAIR(3));
     refresh();
 
     Menu main_menu(0, 1, menu1_x*screenRow, menu1_y*(screenCol-3), 
@@ -116,6 +119,7 @@ int main()
                 reset_prog_mode(); /* Return to the previous tty mode*/
                 
                 attron(COLOR_PAIR(3));
+                mvhline(screenCol-1, 0, ' ', screenRow);
                 if (answer == 'y')
                     mvprintw(screenCol-1, 0, "Note is MyStored!");
                 else
@@ -183,6 +187,7 @@ int main()
                 reset_prog_mode(); /* Return to the previous tty mode*/
                 
                 attron(COLOR_PAIR(3));
+                mvhline(screenCol-1, 0, ' ', screenRow);
                 if (answer == 'y')
                     mvprintw(screenCol-1, 0, "Note is archived!");
                 else
@@ -216,6 +221,7 @@ int main()
                         reset_prog_mode();
 
                         attron(COLOR_PAIR(3));
+                        mvhline(screenCol-1, 0, ' ', screenRow);
                         mvprintw(screenCol-1, 0, "Todo is created!");
                         refresh();
                         attroff(COLOR_PAIR(3));
@@ -239,6 +245,7 @@ int main()
                         if (main2_state == 1) // Show
                         {
                             attron(COLOR_PAIR(3));
+                            mvhline(screenCol-1, 0, ' ', screenRow);
                             mvprintw(screenCol-1, 0, "todo: %s", todo_loc_menu.get_current_item_name(todo_loc_state).c_str());
                             refresh();
                             attroff(COLOR_PAIR(3));
@@ -258,6 +265,7 @@ int main()
                             ftodo.close();
 
                             attron(COLOR_PAIR(3));
+                            mvhline(screenCol-1, 0, ' ', screenRow);
                             mvprintw(screenCol-1, 0, "Todo is deleted!");
                             refresh();
                             attroff(COLOR_PAIR(3));
