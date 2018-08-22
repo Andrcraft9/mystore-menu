@@ -18,6 +18,9 @@
 
 namespace fs = std::filesystem;
 
+static const std::string CONF_PATH("./"); 
+// /home/andr/bin/mystore-menu-conf/config 
+
 std::string get_current_date()
 {
     time_t rawtime;
@@ -39,8 +42,7 @@ int main()
 
     // Config file
     std::ifstream fconf;
-    //fconf.open("/home/andr/bin/mystore-menu-conf/config");
-    fconf.open("config");
+    fconf.open(CONF_PATH + "config");
     
     float menu1_x, menu1_y;
     fconf >> menu1_x;
@@ -192,11 +194,80 @@ int main()
             }
             case 4:
             {
-                Menu todo_loc_menu(1 + 2*menu1_x*(screenRow), 1, 0.3*(1.0 - 2*menu1_x)*(screenRow), (screenCol-3), 
-                    {"todo1", "todo2","todo3", "todo4","todo5", "todo6","todo7", "todo8"});
-                int todo_loc_state;
-                while(todo_loc_state = todo_loc_menu.control());
+                Menu main_menu2(1 + menu1_x*screenRow, 1, menu1_x*screenRow, menu1_y*(screenCol-3), 
+                    {"Show", "Add", "Delete"});
+                int main2_state;
+                main2_state = main_menu2.control();
+                
+                if (main2_state) 
+                {
+                    if (main2_state == 2) // Add
+                    {
+                        def_prog_mode();
+                        endwin();
+                        printf("Please enter todo: \n");
+                        std::string todoname;
+                        std::getline(std::cin, todoname);
+                        
+                        std::ofstream ftodo;
+                        ftodo.open(CONF_PATH + "todo_list", std::ios_base::app);
+                        ftodo << todoname << std::endl;
+                        ftodo.close();
+                        reset_prog_mode();
 
+                        attron(COLOR_PAIR(3));
+                        mvprintw(screenCol-1, 0, "Todo is created!");
+                        refresh();
+                        attroff(COLOR_PAIR(3));
+                    }
+
+                    std::ifstream ftodo;
+                    ftodo.open(CONF_PATH + "todo_list");
+                    std::vector<std::string> vs;
+                    std::string line;
+                    while(std::getline(ftodo, line))
+                    {
+                        if (!line.empty())
+                            vs.push_back(line);
+                    }
+                    ftodo.close();
+
+                    Menu todo_loc_menu(1 + 2*menu1_x*(screenRow), 1, 0.3*(1.0 - 2*menu1_x)*(screenRow), (screenCol-3), vs);
+                    int todo_loc_state;
+                    while(todo_loc_state = todo_loc_menu.control())
+                    {
+                        if (main2_state == 1) // Show
+                        {
+                            attron(COLOR_PAIR(3));
+                            mvprintw(screenCol-1, 0, "todo: %s", todo_loc_menu.get_current_item_name(todo_loc_state).c_str());
+                            refresh();
+                            attroff(COLOR_PAIR(3));
+                        }
+
+                        if (main2_state == 3) // Delete
+                        {
+                            //std::string dname = todo_loc_menu.get_current_item_name(todo_loc_state);
+                            vs.erase(vs.begin() + todo_loc_state - 1);
+
+                            std::ofstream ftodo;
+                            ftodo.open(CONF_PATH + "todo_list");
+                            for (auto& s : vs) 
+                            {
+                                ftodo << s << std::endl;
+                            }
+                            ftodo.close();
+
+                            attron(COLOR_PAIR(3));
+                            mvprintw(screenCol-1, 0, "Todo is deleted!");
+                            refresh();
+                            attroff(COLOR_PAIR(3));
+
+                            break;
+                        }
+                    }
+
+                    
+                }
                 break;
             }
             default:
