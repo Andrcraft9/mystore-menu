@@ -18,7 +18,6 @@
 
 namespace fs = std::filesystem;
 
-
 std::string get_current_date()
 {
     time_t rawtime;
@@ -40,6 +39,7 @@ int main()
 
     // Config file
     std::ifstream fconf;
+    //fconf.open("/home/andr/bin/mystore-menu-conf/config");
     fconf.open("config");
     
     float menu1_x, menu1_y;
@@ -84,7 +84,7 @@ int main()
     refresh();
 
     Menu main_menu(0, 1, menu1_x*screenRow, menu1_y*(screenCol-3), 
-        {"MyStore, Create", "MyStore, Read", "TODO, Local List", "TODO, Global List"});
+        {"MyStore, Create", "MyStore, Read", "MyStore, Archive", "TODO, Local List", "TODO, Global List"});
     int main_state;
 
     while(main_state = main_menu.control())
@@ -99,17 +99,25 @@ int main()
                 std::system("nano note");
 
                 printf("Note is written! \n");
-                printf("Please enter password: \n");
-                scanf("%s", crypt);
-
-                std::string namef = STOR_PATH + get_current_date();
-                write_store(crypt, "./note", namef);
+                char answer;
+                printf("Do you want save it? (y/n) \n");
+                std::cin >> answer;
+                if (answer == 'y')
+                {
+                    printf("Please enter password: \n");
+                    scanf("%s", crypt);
+                    std::string namef = STOR_PATH + get_current_date();
+                    write_store(crypt, "./note", namef);
+                }
                 std::system("rm note");
 
                 reset_prog_mode(); /* Return to the previous tty mode*/
                 
                 attron(COLOR_PAIR(3));
-                mvprintw(screenCol-1, 0, "Note is MyStored!");
+                if (answer == 'y')
+                    mvprintw(screenCol-1, 0, "Note is MyStored!");
+                else
+                    mvprintw(screenCol-1, 0, "Note is deleted!");
                 refresh();
                 attroff(COLOR_PAIR(3));
 
@@ -142,14 +150,63 @@ int main()
                 }
                 break;
             }
+            case 3:
+            {
+                char crypt[50];
+                def_prog_mode(); /* Save the tty modes */
+                endwin(); /* End curses mode temporarily */
+
+                std::string ifilename, ofilename;
+                printf("Print full path of input file: \n");
+                std::cin >> ifilename;
+                printf("Print name of output file: \n");
+                std::cin >> ofilename;
+
+                char answer;
+                printf("Do you want archive %s to %s? (y/n) \n", ifilename.c_str(), ofilename.c_str());
+                std::cin >> answer;
+                if (answer == 'y')
+                {
+                    printf("Please enter password: \n");
+                    scanf("%s", crypt);
+                    if (write_store(crypt, ifilename, STOR_PATH + ofilename) == 0)
+                        std::system((std::string("rm ") + ifilename).c_str());
+                    else
+                    {
+                        printf("Error in write_store! \n");
+                        getch();
+                    }
+                }
+
+                reset_prog_mode(); /* Return to the previous tty mode*/
+                
+                attron(COLOR_PAIR(3));
+                if (answer == 'y')
+                    mvprintw(screenCol-1, 0, "Note is archived!");
+                else
+                    mvprintw(screenCol-1, 0, "Note is ignored");
+                refresh();
+                attroff(COLOR_PAIR(3));
+
+                break;
+            }
+            case 4:
+            {
+                Menu todo_loc_menu(1 + 2*menu1_x*(screenRow), 1, 0.3*(1.0 - 2*menu1_x)*(screenRow), (screenCol-3), 
+                    {"todo1", "todo2","todo3", "todo4","todo5", "todo6","todo7", "todo8"});
+                int todo_loc_state;
+                while(todo_loc_state = todo_loc_menu.control());
+
+                break;
+            }
             default:
                 break;
         }
         
-        attron(COLOR_PAIR(3));
-        mvprintw(screenCol-1, 0, "Your choice is %s \n", main_menu.get_current_item_name(main_state).c_str());
-        refresh();
-        attroff(COLOR_PAIR(3));
+        //attron(COLOR_PAIR(3));
+        //mvprintw(screenCol-1, 0, "Your choice is %s \n", main_menu.get_current_item_name(main_state).c_str());
+        //refresh();
+        //attroff(COLOR_PAIR(3));
     }
     
     } endwin(); // All objects need be deleted before endwin() call
