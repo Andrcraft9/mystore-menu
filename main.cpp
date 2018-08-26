@@ -256,7 +256,7 @@ int main()
             {
                 Menu main_menu2(1 + menu1_x*screenRow, 1, menu1_x*screenRow, menu1_y*(screenCol-3), 
                     COLR_MENU, COLR_DEFAULT, COLR_REVERT_MENU,
-                    {"Show", "Add", "Delete", "Show archive"});
+                    {"Show", "Add", "Finish", "Delete", "Show archive"});
                 int main2_state;
                 main2_state = main_menu2.control();
                 
@@ -278,6 +278,8 @@ int main()
                         reset_prog_mode();
 
                         print_status_bar(screenCol, screenRow, COLR_HIGH, "Todo is created!");
+
+                        break;
                     }
 
                     // Show todo list
@@ -297,7 +299,7 @@ int main()
                     int todo_loc_state;
 
                     // Show archived todo list?
-                    if (main2_state == 4) 
+                    if (main2_state == 5) 
                     {
                         std::ifstream farchtodo;
                         farchtodo.open(CONF_PATH + "todo_archive");
@@ -328,7 +330,7 @@ int main()
                         }
 
                         // Delete item?
-                        if (main2_state == 3)
+                        if (main2_state == 3 || main2_state == 4)
                         {
                             std::string dname = todo_loc_menu.get_current_item_name(todo_loc_state);
                             vs.erase(vs.begin() + todo_loc_state - 1);
@@ -341,12 +343,17 @@ int main()
                             ftodo.close();
 
                             // Archive deleted todo
-                            ftodo.open(CONF_PATH + "todo_archive", std::ios_base::app);
-                            ftodo << dname << " | " << get_current_date() << std::endl;
-                            ftodo.close();
-
-                            print_status_bar(screenCol, screenRow, COLR_HIGH, "Todo is deleted (archived)!");
-
+                            if (main2_state == 3)
+                            {
+                                ftodo.open(CONF_PATH + "todo_archive", std::ios_base::app);
+                                ftodo << dname << " | " << get_current_date() << std::endl;
+                                ftodo.close();
+                                print_status_bar(screenCol, screenRow, COLR_HIGH, "Todo is finished!");
+                            }
+                            else
+                            {
+                                print_status_bar(screenCol, screenRow, COLR_HIGH, "Todo is deleted!");
+                            }
                             break;
                         }
                     }
