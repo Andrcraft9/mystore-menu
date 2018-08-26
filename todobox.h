@@ -4,21 +4,27 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 #include <iostream>
 
-class Menu
+class TodoBox
 {
 public:
-    Menu(int x, int y, int w, int h, int foreground, int background, int pad_color, std::vector<std::string> c) 
+    TodoBox(int x, int y, int w, int h, int foreground, int background, int pad_color, std::vector<std::string> c) 
         : x(x), y(y), width(w), height(h), win(newwin(h, w, y, x)), content(c)
     {
         keypad(win, TRUE);
-        //scrollok(win, TRUE);
-
+       
         items_len = content.size() + 1;
         items = (ITEM **) calloc(items_len + 1, sizeof(ITEM *));
         for(int i = 0; i < items_len - 1; ++i)
-            items[i] = new_item(content.at(i).c_str(), content.at(i).c_str());
+        {
+            //std::stringstream ss;
+            //ss << i + 1;
+            //std::string s = ss.str();
+            //content[i] = s + ". " + content[i];
+            items[i] =  new_item((content[i]).c_str(), (content[i]).c_str());
+        }
         items[items_len - 1] = new_item("Exit", "Exit");
         items[items_len] = (ITEM *) NULL;
         men = new_menu((ITEM **) items);
@@ -27,31 +33,26 @@ public:
         set_menu_sub(men, derwin(win, h-2, w-2, 1, 1));
         set_menu_format(men, int(h*0.8), 1);
 
-        set_menu_mark(men, " * ");
+        set_menu_mark(men, " > ");
         set_menu_back(men, COLOR_PAIR(background));
         set_menu_fore(men, COLOR_PAIR(foreground));
         set_menu_pad(men, COLOR_PAIR(pad_color));
         menu_opts_off(men, O_SHOWDESC);
 
         wbkgd(win, COLOR_PAIR(background));
-
-        //mvprintw(1, 0, "Count %i", items_len);
-        //refresh();
-        //set_menu_sub(men, derwin(win, h-2, w-1, 0, 0));
-        //mvwaddch(win, 2, 0, ACS_LTEE);
-        // mvwhline(win, 2, 1, ACS_HLINE, 38);
-        //mvwaddch(win, 2, 39, ACS_RTEE);
         
         wattron(win, COLOR_PAIR(pad_color));
-        box(win, 0, 0);
+        //box(win, '#', '#');
+        wborder(win, '|', '|', '-', '-', '+', '+', '+', '+');
         wrefresh(win);
         wattroff(win, COLOR_PAIR(pad_color));
         
         refresh();
         post_menu(men);
+        wrefresh(win);
     }
 
-    ~Menu() 
+    ~TodoBox() 
     {
         //wborder(win, ' ', ' ', ' ',' ',' ',' ',' ',' ');
         unpost_menu(men);
@@ -114,6 +115,11 @@ public:
         wrefresh(win);
     }
 
+    void update_content()
+    {
+        //int set_menu_items(MENU *menu, ITEM **items);
+    }
+
 private:
     WINDOW *win;
     MENU *men;
@@ -128,6 +134,6 @@ private:
     int height;
 
     // No copy
-    Menu(const Menu& m);
-    Menu& operator=(Menu const&);
+    TodoBox(const TodoBox& m);
+    TodoBox& operator=(TodoBox const&);
 };

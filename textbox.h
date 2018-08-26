@@ -9,8 +9,8 @@
 class TextBox
 {
 public:
-    TextBox(int x, int y, int w, int h, const std::string c) 
-        : x(x), y(y), width(w), height(h), content(c), win(newwin(h, w, y, x))
+    TextBox(int x, int y, int w, int h, int fore, int back, const std::string c) 
+        : x(x), y(y), width(w), height(h), foreground(fore), background(back), content(c), win(newwin(h, w, y, x))
     {
         keypad(win, TRUE);
         scrollok(win, TRUE);
@@ -61,6 +61,8 @@ private:
     int y;
     int width;
     int height;
+    int foreground; 
+    int background;
     std::string content;
 
     // No copy
@@ -72,8 +74,8 @@ private:
 class TextPadBox
 {
 public:
-    TextPadBox(int x, int y, int w, int h, const std::string c) 
-        : x(x), y(y), width(w), height(h), content(c)
+    TextPadBox(int x, int y, int w, int h, int fore, int back, const std::string c) 
+        : x(x), y(y), width(w), height(h), foreground(fore), background(back), content(c)
     {
         
         int newlines = 0;
@@ -143,6 +145,8 @@ private:
     int width;
     int height;
     int PadHeight;
+    int foreground;
+    int background;
     std::string content;
 
     // No copy
