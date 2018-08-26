@@ -33,16 +33,8 @@ enum
     COLR_HIGH = 10
 };
 
-//static const std::string CONF_PATH("./"); 
-static const std::string CONF_PATH("/home/andr/bin/mystore-menu-conf/"); 
-
-static const char * MONTHS[12] = 
-{
-    "January", "February", "March", 
-    "April", "May", "June", 
-    "July", "August", "September", 
-    "October", "November", "December"
-};
+static const std::string CONF_PATH("./"); 
+//static const std::string CONF_PATH("/home/andr/bin/mystore-menu-conf/"); 
 
 std::string get_current_date()
 {
