@@ -77,6 +77,7 @@ void print_status_bar(int screenCol, int screenRow, int color, std::string msg)
 class WidgetProperty
 {
 public:
+    // Position of widget in screen
     enum Position
     {
         TOPLEFT,
@@ -86,12 +87,11 @@ public:
         BOTTOMMIDDLE,
         BOTTOMRIGHT,
     };
-
     // Screen property
     static int screenRow, screenCol;
-    // Size of each Position block in percents of screen size
-    float menu1_x = 0.3;
-    float menu1_y = 0.45;
+    // Size of each widget position in percents of screen size
+    static const float menu1_x = 0.3;
+    static const float menu1_y = 0.45;
     // Widget Position (x, y)
     int x, y; 
     // Widget size (width, height)
