@@ -1,3 +1,4 @@
+#include "nstools.h"
 #include "menu.h"
 #include "textbox.h"
 #include "mystore.h"
@@ -8,73 +9,19 @@
 #include <menu.h>
 #include <locale.h>
 
+#include <algorithm>  
 #include <ctime>
 #include <vector>
+#include <tuple>
 #include <string>
 #include <iostream>
+#include <chrono>
 #include <fstream>
 #include <filesystem>
 
 #include <cstdlib>
 
 namespace fs = std::filesystem;
-
-enum
-{
-    COLR_RED = 1,
-    COLR_GREEN = 2, 
-    COLR_YELLOW = 3,
-    COLR_BLUE = 4, 
-    COLR_MAGENTA = 5,
-    COLR_CYAN = 6, 
-    COLR_DEFAULT = 7,
-    COLR_MENU = 8,
-    COLR_REVERT_MENU = 9,
-    COLR_HIGH = 10
-};
-
-static const std::string CONF_PATH("./"); 
-//static const std::string CONF_PATH("/home/andr/bin/mystore-menu-conf/"); 
-
-std::string get_current_date()
-{
-    time_t rawtime;
-    struct tm * timeinfo;
-    char buffer[80];
-
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-
-    strftime(buffer, sizeof(buffer), "%d-%m-%Y %I:%M:%S", timeinfo);
-    std::string str(buffer);
-
-    return str;
-}
-
-std::string get_full_current_date()
-{
-    time_t rawtime;
-    struct tm * timeinfo;
-    char buffer[80];
-
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-
-    //strftime(buffer, sizeof(buffer), "%d-%m-%Y %I:%M:%S", timeinfo);
-    strftime(buffer, sizeof(buffer), "%d %B %Y, %A", timeinfo);
-    std::string str(buffer);
-
-    return str;
-}
-
-void print_status_bar(int screenCol, int screenRow, int color, std::string msg)
-{
-    attron(COLOR_PAIR(color));
-    mvhline(screenCol-1, 0, ' ', screenRow);
-    mvprintw(screenCol-1, 0, "%s", msg.c_str());
-    refresh();
-    attroff(COLOR_PAIR(color));
-}
 
 int main()
 {   
@@ -137,7 +84,9 @@ int main()
     cbreak();
 
     int screenRow, screenCol;
-    getmaxyx(stdscr, screenCol, screenRow); 
+    getmaxyx(stdscr, screenCol, screenRow);
+    WidgetProperty::screenRow = screenRow;
+    WidgetProperty::screenCol = screenCol;
 
     std::string hellos;
     hellos = get_full_current_date();
@@ -194,9 +143,19 @@ int main()
                 reset_prog_mode();
 
                 std::string path = STOR_PATH;
-                std::vector<std::string> vs;
+                std::vector<std::tuple<std::string, std::time_t> > vstime;
                 for (const auto & p : fs::directory_iterator(path))
-                    vs.push_back(p.path().u8string());
+                {
+                    auto ftime = fs::last_write_time(p);
+                    std::time_t cftime = decltype(ftime)::clock::to_time_t(ftime); 
+                    vstime.push_back(std::make_tuple(p.path().u8string(), cftime));
+                }
+                // Sort by date
+                std::sort(vstime.begin(), vstime.end(), sortbydate);
+                // Obtain only names from sorted vector of tuples
+                std::vector<std::string> vs;
+                for(auto& it : vstime)
+                    vs.push_back(std::get<0>(it));
                 Menu r_menu(0,  2 + menu1_y*(screenCol-2),  2*menu1_x*(screenRow),  (1.0 - menu1_y)*(screenCol-3), 
                             COLR_MENU, COLR_DEFAULT, COLR_REVERT_MENU,
                             vs);

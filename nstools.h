@@ -88,7 +88,7 @@ public:
     };
 
     // Screen property
-    int screenRow, screenCol;
+    static int screenRow, screenCol;
     // Size of each Position block in percents of screen size
     float menu1_x = 0.3;
     float menu1_y = 0.45;
@@ -100,21 +100,18 @@ public:
     int foreground, background; 
     int pad_color;
 
-    WidgetProperty(WidgetProperty wp, int x, int y, int w, int h)
-        : screenRow(wp.screenRow), screenCol(wp.screenCol), x(x), y(y), w(w), h(h), foreground(wp.foreground), background(wp.background), pad_color(wp.pad_color) {}
-
-    WidgetProperty(int screenRow, int screenCol, int x, int y, int w, int h, int foreground = COLR_MENU, int background = COLR_DEFAULT, int pad_color = COLR_REVERT_MENU)
-        : screenRow(screenRow), screenCol(screenCol), x(x), y(y), w(w), h(h), foreground(foreground), background(background), pad_color(pad_color) {}
+    WidgetProperty(int x, int y, int w, int h, int foreground = COLR_MENU, int background = COLR_DEFAULT, int pad_color = COLR_REVERT_MENU)
+        : x(x), y(y), w(w), h(h), foreground(foreground), background(background), pad_color(pad_color) {}
     
-    WidgetProperty(int screenRow, int screenCol, Position pos, int foreground = COLR_MENU, int background = COLR_DEFAULT, int pad_color = COLR_REVERT_MENU)
-        : screenRow(screenRow), screenCol(screenCol), foreground(foreground), background(background), pad_color(pad_color) 
+    WidgetProperty(Position pos, int foreground = COLR_MENU, int background = COLR_DEFAULT, int pad_color = COLR_REVERT_MENU)
+        : foreground(foreground), background(background), pad_color(pad_color) 
     {
 
         switch(pos)
         {
             case TOPLEFT:
                 x = 0; y = 2 + menu1_y*(screenCol-2);  
-                w = 2*menu1_x*(screenRow); h = (1.0 - menu1_y)*(screenCol-3), 
+                w = 2*menu1_x*(screenRow); h = (1.0 - menu1_y)*(screenCol-3);
                 break;
             case TOPMIDDLE:
 

@@ -22,7 +22,7 @@ int TodoMenu::action(int id)
                     vs.push_back(line);
             }
             ftodo.close();
-            TodoNotes todolist(WidgetProperty(wp, 1 + 2*wp.menu1_x*(wp.screenRow), 1, 0.45*(1.0 - 2*wp.menu1_x)*(wp.screenRow), (wp.screenCol-3)), vs);
+            TodoNotes todolist(WidgetProperty(1 + 2*wp.menu1_x*(wp.screenRow), 1, 0.45*(1.0 - 2*wp.menu1_x)*(wp.screenRow), (wp.screenCol-3)), vs);
             todolist.control();
             break;
         }
