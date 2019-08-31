@@ -40,8 +40,8 @@ std::string get_full_current_date()
 void print_status_bar(int screenCol, int screenRow, int color, std::string msg)
 {
     attron(COLOR_PAIR(color));
-    mvhline(screenCol-1, 0, ' ', screenRow);
-    mvprintw(screenCol-1, 0, "%s", msg.c_str());
+    mvhline(screenRow - 1, 0, ' ', screenCol);
+    mvprintw(screenRow - 1, 0, "%s", msg.c_str());
     refresh();
     attroff(COLOR_PAIR(color));
 }
