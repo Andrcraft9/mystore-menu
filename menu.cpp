@@ -86,13 +86,13 @@ int Menu::control()
                 cur = current_item(men);
                 icur = item_index(cur);
                 if (icur == items_len-1)
-                    return 0;
+                    return -1;
                 else
-                    return action(icur);
+                    action(icur);
                 break;
             case 'q':
             case 'Q':
-                return 0;
+                return -1;
                 break;
             default:
                 break;
@@ -100,7 +100,7 @@ int Menu::control()
         this->show();
     }
 
-    return 0;    
+    return -1;    
 }
 
 void Menu::show()
@@ -108,7 +108,7 @@ void Menu::show()
     wrefresh(win);
 }
 
-int action(int id)
+int Menu::action(int id)
 {
     // Do nothing
     return id;

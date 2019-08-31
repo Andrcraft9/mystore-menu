@@ -1,4 +1,7 @@
-#include <stdio.h>
+
+#ifndef _TODO_MENU_
+#define _TODO_MENU_
+
 #include <ncurses.h>
 #include <menu.h>
 
@@ -12,9 +15,6 @@
 #include "menu.h"
 #include "todonotes.h"
 
-#ifndef _TODO_MENU_
-#define _TODO_MENU_
-
 /* 
 Contains:
     Show: show todo list
@@ -27,10 +27,11 @@ Contains:
 class TodoMenu: public Menu
 {
 public:
-    TodoMenu(WidgetProperty wp) : Menu(wp, {"Show", "Add", "Finish", "Delete", "Show archive"}) {}
+    TodoMenu(WidgetProperty wp);
 
 private:
     virtual int action(int id) override;
+    std::vector<std::string> get_todolist(std::string fname);
 };
 
 #endif

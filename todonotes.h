@@ -1,6 +1,6 @@
-#include <stdio.h>
-#include <ncurses.h>
-#include <menu.h>
+
+#ifndef _TODO_NOTES_
+#define _TODO_NOTES_
 
 #include <vector>
 #include <string>
@@ -8,9 +8,6 @@
 
 #include "nstools.h"
 #include "notes.h"
-
-#ifndef _TODO_NOTES_
-#define _TODO_NOTES_
 
 class TodoNotes: public Notes
 {

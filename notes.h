@@ -1,15 +1,16 @@
-#include <stdio.h>
+
+#ifndef _LOC_NOTES_
+#define _LOC_NOTES_
+
 #include <ncurses.h>
 #include <menu.h>
-#include "nstools.h"
 
 #include <vector>
 #include <string>
 #include <sstream>
 #include <iostream>
 
-#ifndef _LOC_NOTES_
-#define _LOC_NOTES_
+#include "nstools.h"
 
 class Notes
 {
@@ -20,6 +21,8 @@ public:
     std::string get_current_item_name(int id);
     // Main function. Show menu and take control of it.
     int control();
+    // Only one touch and return control
+    int one_touch_control();
 
 protected:
     WidgetProperty wp;

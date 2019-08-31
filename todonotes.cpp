@@ -1,7 +1,8 @@
 #include "todonotes.h"
 
-TodoNotes::TodoNotes(WidgetProperty wp,  std::vector<std::string> c) : Notes(wp, c)
+TodoNotes::TodoNotes(WidgetProperty wp,  std::vector<std::string> c) : Notes(wp, c) 
 {
+    
 }
 
 int TodoNotes::action(int id)

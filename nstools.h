@@ -1,3 +1,7 @@
+
+#ifndef _NCURSES_LOCAL_TOOLS_
+#define _NCURSES_LOCAL_TOOLS_
+
 #include <stdio.h>
 #include <cassert>
 #include <ncurses.h>
@@ -9,8 +13,7 @@
 #include <ctime>
 #include <tuple>
 
-#ifndef _NCURSES_LOCAL_TOOLS_
-#define _NCURSES_LOCAL_TOOLS_
+#define CRYPT_PSWD_MAX_LENGTH 50
 
 enum
 {
@@ -29,50 +32,13 @@ enum
 //static const std::string CONF_PATH("./"); 
 static const std::string CONF_PATH("/home/andr/bin/mystore-menu-conf/"); 
 
-bool sortbydate(std::tuple<std::string, std::time_t> a, std::tuple<std::string, std::time_t> b) 
-{ 
-    return difftime(std::get<1>(a), std::get<1>(b)) > 0;
-}
+bool sortbydate(std::tuple<std::string, std::time_t> a, std::tuple<std::string, std::time_t> b);
 
-std::string get_current_date()
-{
-    time_t rawtime;
-    struct tm * timeinfo;
-    char buffer[80];
+std::string get_current_date();
 
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
+std::string get_full_current_date();
 
-    strftime(buffer, sizeof(buffer), "%d-%m-%Y %I:%M:%S", timeinfo);
-    std::string str(buffer);
-
-    return str;
-}
-
-std::string get_full_current_date()
-{
-    time_t rawtime;
-    struct tm * timeinfo;
-    char buffer[80];
-
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
-
-    //strftime(buffer, sizeof(buffer), "%d-%m-%Y %I:%M:%S", timeinfo);
-    strftime(buffer, sizeof(buffer), "%d %B %Y, %A", timeinfo);
-    std::string str(buffer);
-
-    return str;
-}
-
-void print_status_bar(int screenCol, int screenRow, int color, std::string msg)
-{
-    attron(COLOR_PAIR(color));
-    mvhline(screenCol-1, 0, ' ', screenRow);
-    mvprintw(screenCol-1, 0, "%s", msg.c_str());
-    refresh();
-    attroff(COLOR_PAIR(color));
-}
+void print_status_bar(int screenCol, int screenRow, int color, std::string msg);
 
 class WidgetProperty
 {
@@ -80,18 +46,27 @@ public:
     // Position of widget in screen
     enum Position
     {
-        TOPLEFT,
-        TOPMIDDLE,
-        TOPRIGHT,
-        BOTTOMLEFT,
-        BOTTOMMIDDLE,
-        BOTTOMRIGHT,
+        TOP_LEFT,
+        TOP_MIDDLE,
+        TOP_RIGHT,
+        TOP_LEFT_MIDDLE,
+        TOP_MIDDLE_RIGHT,
+        BOTTOM_LEFT,
+        BOTTOM_MIDDLE,
+        BOTTOM_RIGHT,
+        BOTTOM_LEFT_MIDDLE,
+        BOTTOM_MIDDLE_RIGHT,
+        TOP_BOTTOM_MIDDLE_RIGHT
     };
     // Screen property
     static int screenRow, screenCol;
-    // Size of each widget position in percents of screen size
-    static const float menu1_x = 0.3;
-    static const float menu1_y = 0.45;
+    // Size of each widget position (in percents of screen size)
+    static const float menu1_x;
+    static const float menu1_y;
+    // Margin between windows (in pixels)
+    static const int margin_x;
+    static const int margin_y;
+
     // Widget Position (x, y)
     int x, y; 
     // Widget size (width, height)
@@ -109,24 +84,54 @@ public:
 
         switch(pos)
         {
-            case TOPLEFT:
-                x = 0; y = 2 + menu1_y*(screenCol-2);  
-                w = 2*menu1_x*(screenRow); h = (1.0 - menu1_y)*(screenCol-3);
+            // Default top positions
+            case TOP_LEFT:
+                x = 0; y = 1;  
+                w = menu1_x*(screenCol) - margin_x; h = menu1_y*(screenRow - 2) - margin_y;
                 break;
-            case TOPMIDDLE:
-
+            case TOP_MIDDLE:
+                x = menu1_x*(screenCol); y = 1;
+                w = menu1_x*(screenCol) - margin_x; h = menu1_y*(screenRow - 2) - margin_y;
                 break;
-            case TOPRIGHT:
-
+            case TOP_RIGHT:
+                x = 2*menu1_x*(screenCol); y = 1;
+                w = menu1_x*(screenCol) - margin_x; h = menu1_y*(screenRow - 2) - margin_y;
                 break;
-            case BOTTOMLEFT:
-
+            // Extended top positions
+            case TOP_LEFT_MIDDLE:
+                x = 0; y = 1;  
+                w = 2*menu1_x*(screenCol) - margin_x; h = menu1_y*(screenRow - 2) - margin_y;
                 break;
-            case BOTTOMMIDDLE:
-
+            case TOP_MIDDLE_RIGHT:
+                x = 2*menu1_x*(screenCol); y = 1;
+                w = 2*menu1_x*(screenCol) - margin_x; h = menu1_y*(screenRow - 2) - margin_y;
+                break;
+            // Deafult bottom positions
+            case BOTTOM_LEFT:
+                x = 0; y = 1 + menu1_y*(screenRow - 2);  
+                w = menu1_x*(screenCol) - margin_x; h = menu1_y*(screenRow - 2) - margin_y;
+                break;
+            case BOTTOM_MIDDLE:
+                x = menu1_x*(screenCol); y = 1 + menu1_y*(screenRow - 2);  
+                w = menu1_x*(screenCol) - margin_x; h = menu1_y*(screenRow - 2) - margin_y;
                 break;    
-            case BOTTOMRIGHT:
-
+            case BOTTOM_RIGHT:
+                x = 2*menu1_x*(screenCol); y = 1 + menu1_y*(screenRow - 2);  
+                w = menu1_x*(screenCol) - margin_x; h = menu1_y*(screenRow - 2) - margin_y;
+                break;
+            // Extended bottom positions
+            case BOTTOM_LEFT_MIDDLE:
+                x = 0; y = 1 + menu1_y*(screenRow - 2);  
+                w = 2*menu1_x*(screenCol) - margin_x; h = menu1_y*(screenRow - 2) - margin_y;
+                break;
+            case BOTTOM_MIDDLE_RIGHT:
+                x = menu1_x*(screenCol); y = 1 + menu1_y*(screenRow - 2);  
+                w = 2*menu1_x*(screenCol) - margin_x; h = menu1_y*(screenRow - 2) - margin_y;
+                break;
+            // Top and Bottom
+            case TOP_BOTTOM_MIDDLE_RIGHT:
+                x = menu1_x*(screenCol); y = 1;
+                w = 2*menu1_x*(screenCol) - margin_x; h = (screenRow - 2) - margin_y;
                 break;
             default:
                 //throw "Invalid possition";

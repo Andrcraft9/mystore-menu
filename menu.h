@@ -1,4 +1,7 @@
-#include <stdio.h>
+
+#ifndef _LOC_MENU_
+#define _LOC_MENU_
+
 #include <ncurses.h>
 #include <menu.h>
 
@@ -6,8 +9,7 @@
 #include <string>
 #include <iostream>
 
-#ifndef _LOC_MENU_
-#define _LOC_MENU_
+#include "nstools.h"
 
 class Menu
 {

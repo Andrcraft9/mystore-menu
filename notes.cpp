@@ -86,17 +86,57 @@ int Notes::control()
                 cur = current_item(men);
                 icur = item_index(cur);
                 if (icur == items_len-1)
-                    return 0;
+                    return -1;
                 else
-                    return action(icur); 
+                    action(icur); 
                 break;
+            case 'q':
+            case 'Q':
+                return -1;
             default:
                 break;
         }
         this->show();
     }
 
-    return 0;    
+    return -1;    
+}
+
+int Notes::one_touch_control()
+{
+    int c, icur;
+    ITEM *cur;
+
+    this->show();
+    while(1)
+    {
+        c = wgetch(win);
+        switch(c)
+        {
+            case KEY_UP:
+                menu_driver(men, REQ_UP_ITEM);
+                break;
+            case KEY_DOWN:
+                menu_driver(men, REQ_DOWN_ITEM);
+                break;
+            case 10:
+                cur = current_item(men);
+                icur = item_index(cur);
+                if (icur == items_len-1)
+                    return -1;
+                else
+                    return action(icur); 
+                break;
+            case 'q':
+            case 'Q':
+                return -1;
+            default:
+                break;
+        }
+        this->show();
+    }
+
+    return -1;    
 }
 
 void Notes::show()
