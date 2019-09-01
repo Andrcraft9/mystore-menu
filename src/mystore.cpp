@@ -1,4 +1,4 @@
-#include "mystore.h"
+#include "mstor/mystore.h"
 
 
 int crypt_add(int c, int count, char* crypt)

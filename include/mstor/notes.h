@@ -10,7 +10,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "nstools.h"
+#include "mstor/nstools.h"
 
 class Notes
 {

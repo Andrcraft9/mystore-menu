@@ -6,10 +6,10 @@
 #include <string>
 #include <iostream>
 
-#include "nstools.h"
-#include "mystore.h"
-#include "notes.h"
-#include "textbox.h"
+#include "mstor/nstools.h"
+#include "mstor/mystore.h"
+#include "mstor/notes.h"
+#include "mstor/textbox.h"
 
 class StoreNotes: public Notes
 {

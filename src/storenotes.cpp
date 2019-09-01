@@ -1,4 +1,4 @@
-#include "storenotes.h"
+#include "mstor/storenotes.h"
 
 StoreNotes::StoreNotes(WidgetProperty wp,  std::vector<std::string> c, char cr[]) :  Notes(wp, c)
 {

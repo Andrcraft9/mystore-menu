@@ -1,4 +1,4 @@
-#include "storemenu.h"
+#include "mstor/storemenu.h"
 
 StoreMenu::StoreMenu(WidgetProperty wp) : Menu(wp, {"MyStore, Create", "MyStore, Read", "MyStore, Archive", "TODO"}) 
 {

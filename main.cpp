@@ -1,25 +1,16 @@
-#include "nstools.h"
-#include "storemenu.h"
-#include "menu.h"
+#include "mstor/nstools.h"
+#include "mstor/storemenu.h"
+#include "mstor/menu.h"
 
 #include <stdio.h>
 #include <ncurses.h>
 #include <menu.h>
 #include <locale.h>
 
-#include <algorithm>  
-#include <ctime>
 #include <vector>
-#include <tuple>
 #include <string>
 #include <iostream>
-#include <chrono>
-#include <fstream>
-#include <filesystem>
-
 #include <cstdlib>
-
-namespace fs = std::filesystem;
 
 int WidgetProperty::screenRow;
 int WidgetProperty::screenCol;

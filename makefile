@@ -1,5 +1,5 @@
 CXX = g++-8
-OPT = -std=c++17
+OPT = -std=c++17 -Iinclude
 
 INC_FILES =      \
 	nstools.h    \
@@ -13,15 +13,15 @@ INC_FILES =      \
 	storenotes.h
 
 SRC_FILES =         \
-	nstools.cpp     \
-	mystore.cpp     \
-	menu.cpp        \
-	notes.cpp       \
-	textbox.cpp     \
-	todomenu.cpp    \
-	todonotes.cpp   \
-	storemenu.cpp   \
-	storenotes.cpp
+	src/nstools.cpp     \
+	src/mystore.cpp     \
+	src/menu.cpp        \
+	src/notes.cpp       \
+	src/textbox.cpp     \
+	src/todomenu.cpp    \
+	src/todonotes.cpp   \
+	src/storemenu.cpp   \
+	src/storenotes.cpp
 
 
 all:

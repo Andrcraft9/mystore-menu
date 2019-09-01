@@ -12,11 +12,11 @@
 #include <fstream>
 #include <filesystem>
 
-#include "mystore.h"
-#include "nstools.h"
-#include "menu.h"
-#include "storenotes.h"
-#include "todomenu.h"
+#include "mstor/mystore.h"
+#include "mstor/nstools.h"
+#include "mstor/menu.h"
+#include "mstor/storenotes.h"
+#include "mstor/todomenu.h"
 
 /*
 Contains:

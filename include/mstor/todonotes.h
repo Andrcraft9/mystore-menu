@@ -6,8 +6,8 @@
 #include <string>
 #include <iostream>
 
-#include "nstools.h"
-#include "notes.h"
+#include "mstor/nstools.h"
+#include "mstor/notes.h"
 
 class TodoNotes: public Notes
 {

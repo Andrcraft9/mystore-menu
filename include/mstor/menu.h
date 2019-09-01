@@ -9,7 +9,7 @@
 #include <string>
 #include <iostream>
 
-#include "nstools.h"
+#include "mstor/nstools.h"
 
 class Menu
 {

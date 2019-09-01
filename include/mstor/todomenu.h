@@ -11,9 +11,9 @@
 #include <fstream>
 #include <cstdlib>
 
-#include "nstools.h"
-#include "menu.h"
-#include "todonotes.h"
+#include "mstor/nstools.h"
+#include "mstor/menu.h"
+#include "mstor/todonotes.h"
 
 /* 
 Contains:
